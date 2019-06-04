@@ -13,7 +13,7 @@ Tabel: Rooms, waar alle kamers gedefinieerd zijn.
 
 Details Rooms:
 
-1. Kamernummer;
+1. Kamernumme, ForeignKey;
 2. Aantal personen;
 3. Prijs;
 
@@ -25,7 +25,7 @@ Tabel: Bookings, maken voor het bijhouden wie er welke kamer heeft gehuurd.
 
 Details Bookings:
 
-1. ID;
+1. ID, ForeignKey;
 2. Naam;
 3. Start_date
 4. End_date
