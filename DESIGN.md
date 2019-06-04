@@ -80,7 +80,3 @@ Dit zijn alle html pagina's die de Groep2 kan zien.
 
 En tot slot alle pagina's waar Groep3 bij kan komen.
 ![Alt Image Text](html_images/Group3.png "Optional Title")
-
-API:
-
-Kalender: https://developers.google.com/calendar/overview
