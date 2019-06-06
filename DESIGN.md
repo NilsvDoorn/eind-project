@@ -13,7 +13,7 @@ Tabel: Rooms, waar alle kamers gedefinieerd zijn.
 
 Details Rooms:
 
-1. Kamernumme, ForeignKey;
+1. Kamernummer;
 2. Aantal personen;
 3. Prijs;
 
@@ -25,20 +25,17 @@ Tabel: Bookings, maken voor het bijhouden wie er welke kamer heeft gehuurd.
 
 Details Bookings:
 
-1. ID, ForeignKey;
-2. Naam;
-3. Start_date
-4. End_date
-5. arrival_date
-6. arrival_time
-7. Wachtwoord;
-8. Kamernummer;
+1. Naam;
+2. Start_date
+3. End_date
+4. arrival_date
+5. arrival_time
+6. Kamernummer;
 
 Er komt een pagina waar je je mening kan geven. Je kan je mening zowel annoniem, als met je naam erbij neerzetten. Ook het kamernummer komt erbij, zodat daar naar gekeken kan worden als er bijvoorbeeld meerdere slechte feedbacks komen vanuit dezelfde kamer. Tabel: Reviews is meningen tabel. Cijfer kunnen aangegeven worden door sterren aan te klikken en er kan een mening getyped worden. dit is niet meer te zien als deze persoon al een review heeft geplaatst. Dan zijn alleen alle reviews te zien. Groep1 en Groep3 kunnen ook alleen de reviwes zien. Staff is de enige die het kamernummer erbij ziet.
 
 Details Reviews:
 
-1. ID, ForeignKey;
 1. Naam;
 2. kamernummer;
 3. cijfer;
@@ -56,27 +53,30 @@ Online chat maken met socket.io, waar mensen met elkaar kunnen praten en staff b
 
 Details Chat:
 
-1. ID, ForeignKey;
-2. Naam;
-3. kamernummer;
-4. message;
-5. time;
+1. Naam;
+2. kamernummer;
+3. message;
+4. time;
 
 
 Details Clipped:
 
-1. ID, ForeignKey;
-2. naam_staff;
-3. Naam_user;
-4. kamernummer;
-5. message;
-6. time;
+1. naam_staff;
+2. Naam_user;
+3. kamernummer;
+4. message;
+5. time;
 
 Dit zijn alle html pagina's die de staff kan zien. de geel gevinkde vakken, geven aan waar je bent volgens de navigate-bar. Alle blauwe vakken zijn subit knoppen, waar de persoon in een bepaalde groep iets aan een tabel kunnen toevoegen.
 ![Alt Image Text](html_images/Group1.png "Optional Title")
 
-Dit zijn alle html pagina's die de Groep2 kan zien.
+Dit zijn alle html pagina's die de Groep2 kan zien. 
 ![Alt Image Text](html_images/Group2.png "Optional Title")
 
 En tot slot alle pagina's waar Groep3 bij kan komen.
 ![Alt Image Text](html_images/Group3.png "Optional Title")
+
+API:
+
+Kalender:
+https://developers.google.com/calendar/overview
