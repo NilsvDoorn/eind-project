@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In outsider
+{% endblock %}
+
+{% block main %}
+  {% if message %}
+      <div>
+          {{ message }}
+      </div>
+  {% endif %}
+  {% if request.user.is_authenticated and not user.is_superuser and not reviewed %}
+    <form action="/add_review" method="post">
+      {% csrf_token %}
+      <div id="add_review">
+        <h3> add your review </h3>
+          <input type="checkbox" name="anoniem" value="True">Anoniem</input><br>
+          <input autocomplete="off" autofocus type="text" name="review" placeholder="Add text...." style="width:500px">
+          <input type = number min=1 max=5 placeholder="Rating" name="rating" style="width:100px">
+          <button class="btn btn-primary" name="book" type="submit" value="{{ current.user }}">add</button>
+      </div>
+    </form>
+  {% endif %}
+  <table id="myTable" class="table table-striped table-bordered" style="width:100%">
+      <thead>
+          <tr>
+              <th>person</th>
+              <th>review</th>
+              <th>note</th>
+          </tr>
+      </thead>
+      <tbody>
+          <ul>
+              {% for review in reviews %}
+                  <tr>
+                    {% if review.anoniem == True %}
+                      <td>Annoniem</td>
+                    {% else %}
+                      <td>{{ review.name }}</td>
+                    {% endif %}
+                      <td>{{ review.message }}</td>
+                      <td>{{ review.note }}</td>
+                  </tr>
+              {% endfor %}
+          </ul>
+      </tbody>
+    </table>
+{% endblock %}
