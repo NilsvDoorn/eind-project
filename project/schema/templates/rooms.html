@@ -17,7 +17,7 @@
       <tr>
         <th class="th-sm"></th>
         <th class="th-sm">Roomnumber</th>
-        <th class="th-sm">Size (in persons)</th>
+        <th class="th-sm">Capacity (in persons)</th>
         <th class="th-sm">Price (in $)</th>
       </tr>
     </thead>
@@ -26,7 +26,7 @@
           <tr>
             <td><button class="btn btn-primary" type="submit" name="roomnumber" value="{{ room.roomnumber }}">Book</button></td>
             <td>{{ room.roomnumber }}</td>
-            <td>{{ room.person_space }}</td>
+            <td>{{ room.capacity }}</td>
             <td>{{ room.price }}</td>
           </tr>
       {% endfor %}

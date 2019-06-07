@@ -32,21 +32,21 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if user.is_superuser %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/">Rooms</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/all_reservations">all_reservations</a></li>
                         <li class="nav-item"><a class="nav-link" href="/cleanshifts">Cleanshifts</a></li>
                         <li class="nav-item"><a class="nav-link" href="/reviews">Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                     </ul>
                 {% elif request.user.is_authenticated %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/">Rooms</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/">Reserve</a></li>
                         <li class="nav-item"><a class="nav-link" href="/cleanshifts">Cleanshifts</a></li>
                         <li class="nav-item"><a class="nav-link" href="/reviews">Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/">Rooms</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/">Reserve</a></li>
                         <li class="nav-item"><a class="nav-link" href="/reviews">Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
                     </ul>

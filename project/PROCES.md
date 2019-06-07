@@ -14,3 +14,16 @@ Vandaag heb ik alle tabellen beschreven in mijn design document en heb ik alle h
 2. stripes bekijken van de opdracht pizza
 3. socket van django bekijken
 4. de laatste pagina's linken aan de knoppen
+
+# day 5
+
+Vandaag aan met de groep en Marijn gezeten. iedereen zijn bestand nogmaals gezien. 
+
+to-do list in volgorde:
+
+1. Overlap in kamers onmogelijk maken
+2. mogelijk maken om een kamer te boeken
+3. kalender per maand voor admin
+4. mogelijk maken om een schoonmaak moment door te geven
+5. kalender per dag voor schoonmaakmomenten
+6. Chat als het mogelijk is met de tijd
