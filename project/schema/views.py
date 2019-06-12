@@ -4,40 +4,47 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import *
+import string
+import random
 
-from datetime import datetime
+from datetime import datetime, date
 from collections import namedtuple
-
-from django.views import generic
-from django.utils.safestring import mark_safe
-# from .utils import Calendar
 
 # Create your views here.
 def show_rooms(request):
     if request.method == "GET":
         return render(request,"reserve.html")
-    start_date = request.POST['start_date']
-    end_date = request.POST['end_date']
-
+    start_date = request.POST['daterange'][:10]
+    start_date = start_date[6:] + "-" + start_date[:2]+ "-" + start_date[3:5]
+    end_date = request.POST['daterange'][13:]
+    end_date = end_date[6:] + "-" + end_date[:2]+ "-" + end_date[3:5]
     if start_date > end_date:
         return render(request,"reserve.html", {'message':'Start date should be smaller compared to End date'})
+
+    today = str(date.today())
+    if today > start_date:
+        return render(request,"reserve.html", {'message':'This date is already over'})
+
     capacity = request.POST['capacity']
     rooms = Rooms.objects.filter(capacity__gte=capacity)
     Range = namedtuple('Range', ['start', 'end'])
     r1 = Range(start=datetime(int(start_date[:4]),int(start_date[5:7]),int(start_date[8:10])), end=datetime(int(end_date[:4]),int(end_date[5:7]),int(end_date[8:10])))
+
     for booking in Booked.objects.all():
-        print(booking)
-        r2 = Range(start=datetime(booking.start_date[:4],booking.start_date[5:7],booking.start_date[8:10]), end=datetime(booking.end_date[:4],booking.end_date[5:7],booking.end_date[8:10]))
+        r2 = Range(start=datetime(int(str(booking.start_date)[:4]),int(str(booking.start_date)[5:7]),int(str(booking.start_date)[8:10])), end=datetime(int(str(booking.end_date)[:4]),int(str(booking.end_date)[5:7]),int(str(booking.end_date)[8:10])))
         latest_start = max(r1.start, r2.start)
         earliest_end = min(r1.end, r2.end)
         delta = (earliest_end - latest_start).days + 1
         overlap = max(0, delta)
         if overlap:
-            print('true')
-        else:
-            print('false')
+            rooms = rooms.exclude(roomnumber__exact=booking.roomnumber)
+
+    if len(rooms) == 0:
+        return render(request,"reserve.html", {'message':'There are no rooms free in this period'})
     context = {
-        'rooms':rooms
+        'rooms':rooms,
+        'start_date':start_date,
+        'end_date':end_date
     }
     return render(request,"rooms.html", context)
 
@@ -49,7 +56,7 @@ def login_view(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return HttpResponseRedirect(reverse("show_rooms"))
+        return HttpResponseRedirect(reverse("reserve"))
     else:
         return render(request, "login.html", {"message": "Invalid credentials."})
 
@@ -58,13 +65,22 @@ def logout_view(request):
     return render(request, "login.html", {"message": "Logged out."})
 
 def cleanshifts(request):
-    context = {
-        'cleanshifts':Cleanshifts.objects.all()
-    }
+    user = request.user
+    try:
+        booking = Booked.objects.get(name__exact=user)
+        context = {
+            'user':user,
+            'booking':booking
+        }
+    except:
+        context = {
+            'user':user
+        }
     return render(request,"cleanshifts.html", context)
 
 def add_cleanshift(request):
-    pass
+
+    return render(request,"reserve.html")
 
 def reviews(request):
     reviewed = False
@@ -87,15 +103,49 @@ def add_review(request):
     return HttpResponseRedirect(reverse("reviews"))
 
 def room_info(request):
-    print(request.POST['roomnumber'])
-    print(Rooms.objects.filter(roomnumber__exact=request.POST['roomnumber']))
     context = {
-        'room_info':Rooms.objects.filter(roomnumber__exact=request.POST['roomnumber'])
+        'roomnumber':request.POST['roomnumber'],
+        'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
+        'start_date':request.POST['start_date'],
+        'end_date':request.POST['end_date']
     }
     return render(request,"room_info.html", context)
 
 def add_booking(request):
-    pass
+    if request.POST['name'] == "" or request.POST['email'] == "" or request.POST['phone'] == "":
+        context = {
+            'roomnumber':request.POST['roomnumber'],
+            'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
+            'start_date':request.POST['start_date'],
+            'end_date':request.POST['end_date'],
+            'message':'Fill in all information'
+        }
+        return render(request,"room_info.html", context)
+    name = request.POST['name']
+    email = request.POST['email']
+    phonenumber = ('06' + request.POST['phone'])
+    roomnumber = request.POST['roomnumber']
+    start_date = request.POST['start_date']
+    end_date = request.POST['end_date']
+    try:
+        user = User.objects.get(username__exact=name)
+    except:
+        user = None
+    print('user', user)
+    if user is not None:
+        context = {
+            'roomnumber':request.POST['roomnumber'],
+            'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
+            'start_date':request.POST['start_date'],
+            'end_date':request.POST['end_date'],
+            'message':'Name has already been taken'
+        }
+        return render(request,"room_info.html", context)
+    password = randompassword()
+    user = User.objects.create_user(name, email, password)
+    user.save()
+    book = Booked.objects.create(name=name,roomnumber=roomnumber,start_date=start_date,end_date=end_date,phonenumber=phonenumber)
+    return HttpResponseRedirect(reverse("reserve"))
 
 def reserve(request):
     return render(request,"reserve.html")
@@ -103,26 +153,7 @@ def reserve(request):
 def all_reservations(request):
     return render(request,"all_reservations.html")
 
-# class CalendarView(generic.ListView):
-#     model = Event
-#     template_name = 'cal/calendar.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#
-#         # use today's date for the calendar
-#         d = get_date(self.request.GET.get('day', None))
-#
-#         # Instantiate our calendar class with today's year and date
-#         cal = Calendar(d.year, d.month)
-#
-#         # Call the formatmonth method, which returns our calendar as a table
-#         html_cal = cal.formatmonth(withyear=True)
-#         context['calendar'] = mark_safe(html_cal)
-#         return context
-#
-# def get_date(req_day):
-#     if req_day:
-#         year, month = (int(x) for x in req_day.split('-'))
-#         return date(year, month, day=1)
-#     return datetime.today()
+def randompassword():
+    chars=string.ascii_uppercase + string.ascii_lowercase + string.digits
+    size=8
+    return ''.join(random.choice(chars) for x in range(size,12))

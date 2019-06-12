@@ -23,7 +23,15 @@ to-do list in volgorde:
 
 1. Overlap in kamers onmogelijk maken
 2. mogelijk maken om een kamer te boeken
+3. sorteerbalk make voor de kamers
 3. kalender per maand voor admin
 4. mogelijk maken om een schoonmaak moment door te geven
 5. kalender per dag voor schoonmaakmomenten
 6. Chat als het mogelijk is met de tijd
+
+# day 6 
+2e pinksterdag
+
+# day 7
+
+iedereen kan nu een booking toevoegen aan de lijst. Er wordt ook een account voor deze persoon gemaakt en een random wachtwoord die hij/zij bij arriveren overhandigd krijgt om te kunnen inloggen. Na het inloggen 

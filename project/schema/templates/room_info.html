@@ -10,5 +10,37 @@
           {{ message }}
       </div>
   {% endif %}
-  {{ room_info }}
+  <div class="form-group">
+    Luxe: {{ room_info.luxe }}
+  </div>
+  <div class="form-group">
+    Capacity: {{ room_info.capacity }}
+  </div>
+  <div class="form-group">
+    Price: ${{ room_info.price }}
+  </div>
+  <form action="/add_booking" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        Full name:<br>
+        <input autocomplete="off" autofocus class="form-control" name="name" type="text">
+    </div>
+    <div class="form-group">
+        Email:<br>
+        <input autocomplete="off" autofocus class="form-control" name="email" placeholder="Email" type="text">
+    </div>
+    <div class="form-group">
+        Phone number:<br>
+        06-<input autocomplete="off" autofocus name="phone" placeholder="12345678" type="text">
+    </div>
+    <div class="form-group">
+      from {{ start_date }}
+      to {{ end_date }}
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" type="submit" name="roomnumber" value="{{ roomnumber }}">Book</button>
+    </div>
+    <input type="text" value="{{ start_date }}" name="start_date" style="visibility: hidden">
+    <input type="text" value="{{ end_date }}" name="end_date" style="visibility: hidden">
+  </form>
 {% endblock %}

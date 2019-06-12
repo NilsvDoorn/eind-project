@@ -12,24 +12,31 @@
   {% endif %}
   <form action="/room_info" method="POST">
     {% csrf_token %}
+    <p>
+      from  {{ start_date }}
+      to {{ end_date }}
+    </p>
     <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th class="th-sm"></th>
-        <th class="th-sm">Roomnumber</th>
-        <th class="th-sm">Capacity (in persons)</th>
-        <th class="th-sm">Price (in $)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for room in rooms %}
-          <tr>
-            <td><button class="btn btn-primary" type="submit" name="roomnumber" value="{{ room.roomnumber }}">Book</button></td>
-            <td>{{ room.roomnumber }}</td>
-            <td>{{ room.capacity }}</td>
-            <td>{{ room.price }}</td>
-          </tr>
-      {% endfor %}
-    </tbody>
+      <thead>
+        <tr>
+          <th class="th-sm"></th>
+          <th class="th-sm">luxe (from first to 4th class)<br>Search: <input type="number" name="luxe"></th>
+          <th class="th-sm">Capacity (in persons)<br>Search: <input type="number" name="capacity"></th>
+          <th class="th-sm">Price (by day in $)<br>Search: <input type="number" name="price"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for room in rooms %}
+            <tr>
+              <td><button class="btn btn-primary" type="submit" name="roomnumber" value="{{ room.roomnumber }}">Book</button></td>
+              <td>{{ room.luxe }}</td>
+              <td>{{ room.capacity }}</td>
+              <td>{{ room.price }}</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <input type="text" value="{{ start_date }}" name="start_date" style="visibility: hidden">
+    <input type="text" value="{{ end_date }}" name="end_date" style="visibility: hidden">
   </form>
 {% endblock %}

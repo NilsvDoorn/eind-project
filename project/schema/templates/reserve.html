@@ -13,22 +13,24 @@
   <form action="show_rooms" method="post">
     {% csrf_token %}
     <p>
-
-      Start date: <br>
-      <input type="text" name="start_date" placeholder="YYYY-MM-DD" required
-            pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))"
-            title="Enter a date in this format YYYY-MM-DD"/>
+      Date: <br>
+      <input type="text" name="daterange" readonly>
     </p>
     <p>
-      End date: <br>
-      <input type="text" name="end_date" placeholder="YYYY-MM-DD" required
-            pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))"
-            title="Enter a date in this format YYYY-MM-DD"/>
-    </p>
-    <p>
-      Capacity: <br>
-      <input type="number" name="capacity" min="1" max="4">
+      Minimum capacity of people: <br>
+      <input type="number" name="capacity" min="1" max="4" value=1>
     </p>
     <button class="btn btn-primary" type="submit">Search</button>
   </form>
+
+  <script>
+    $('input[name="dates"]').daterangepicker();
+    $(function() {
+      $('input[name="daterange"]').daterangepicker({
+        opens: 'left'
+      }, function(start, end, label) {
+        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+      });
+    });
+  </script>
 {% endblock %}
