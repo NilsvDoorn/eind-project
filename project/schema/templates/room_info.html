@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In outsider
+    Room information
 {% endblock %}
 
 {% block main %}
   {% if message %}
-      <div>
+      <div class="form-group">
           {{ message }}
       </div>
   {% endif %}
@@ -42,5 +42,6 @@
     </div>
     <input type="text" value="{{ start_date }}" name="start_date" style="visibility: hidden">
     <input type="text" value="{{ end_date }}" name="end_date" style="visibility: hidden">
+    <input type="text" value="{{ room_info.price }}" name="price" style="visibility: hidden">
   </form>
 {% endblock %}

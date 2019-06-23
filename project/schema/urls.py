@@ -13,5 +13,10 @@ urlpatterns = [
     path("add_cleanshift", views.add_cleanshift, name="add_cleanshift"),
     path("add_review", views.add_review, name="add_review"),
     path("add_booking", views.add_booking, name="add_booking"),
-    path("all_reservations", views.all_reservations, name="all_reservations")
+    path("all_reservations", views.all_reservations, name="all_reservations"),
+    path("events", views.events, name="events"),
+    path("events_clean", views.events_clean, name="events_clean"),
+    path("events_clean_person", views.events_clean_person, name="events_clean_person"),
+    path("mollie", views.mollie, name="mollie"),
+    path("succes", views.succes, name="succes"),
 ]

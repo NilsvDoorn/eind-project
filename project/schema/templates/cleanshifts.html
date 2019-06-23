@@ -5,8 +5,17 @@
 {% endblock %}
 
 {% block main %}
+{% block style %}
+
+    <link href='static/schema/calendar/packages/core/main.css' rel='stylesheet' />
+    <link href='static/schema/calendar/packages/daygrid/main.css' rel='stylesheet' />
+
+    <script src='static/schema/calendar/packages/core/main.js'></script>
+    <script src='static/schema/calendar/packages/daygrid/main.js'></script>
+
+{% endblock %}
   {% if message %}
-      <div>
+      <div class="form-group">
           {{ message }}
       </div>
   {% endif %}
@@ -17,28 +26,216 @@
     </div>
     {% if not request.user.is_superuser %}
       <div class="form-group">
-        Room: {{ booking.roomnumber }}
+        Room: <br>
+        <input type="number" name="roomnumber" value="{{ booking.roomnumber }}" readonly>
       </div>
     {% else %}
     <div class="form-group">
       Room: <br>
-      <input type="number" name="roomnumber" value="1" min="1">
+      <input type="number" name="roomnumber2" value="1" min="1">
     </div>
     {% endif %}
     <div class="form-group">
-    Date: <br>
-    <input type="text" name="start_date" placeholder="YYYY-MM-DD" required
-          pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))"
-          title="Enter a date in this format YYYY-MM-DD"/>
+      Date: <br>
+      <input type="text" name="datetimes" readonly>
+    </div>
+    <div class="form-group">
+      Start time: <br>
+      <div class="input-group clockpicker">
+          <input type="text" name="start_time" readonly>
+          <span class="input-group-addon">
+              <span class="glyphicon glyphicon-time"></span>
+          </span>
+      </div>
+    </div>
+    <div class="form-group">
+      End time: <br>
+      <div class="input-group clockpicker">
+          <input type="text" name="end_time" readonly>
+          <span class="input-group-addon">
+              <span class="glyphicon glyphicon-time"></span>
+          </span>
+      </div>
     </div>
     {% if not request.user.is_superuser %}
-      <div class="form-group">
+      <p>
           <button class="btn btn-primary" type="submit" name="roomnumber" value="{{ booking.roomnumber }}">Submit</button>
-      </div>
+      </p>
     {% else %}
-      <div class="form-group">
+      <p>
           <button class="btn btn-primary" type="submit" name="roomnumber">Submit</button>
-      </div>
+      </p>
     {% endif %}
   </form>
+</div>
+
+
+<script>
+$(function() {
+$('input[name="datetimes"]').daterangepicker({
+  singleDatePicker: true,
+  showDropdowns: true,
+  locale: {
+    format: 'YYYY-MM-DD'
+  }
+}, function(start, end, label) {
+  var years = moment().diff(start, 'years');
+});
+});
+</script>
+
+
+<script>
+$('.clockpicker').clockpicker({
+  placement: 'bottom',
+  align: 'left',
+  donetext: 'Done'
+});
+</script>
+
+{% if user.is_superuser %}
+  <div id='calendar'></div>
+
+  <!-- Modal -->
+  <form class="m-5" action="cleanshifts" method="post">
+    {% csrf_token %}
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="bodytext" class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <input type="hidden" name="eventtitle" id="eventtitle" value=""/>
+          <input type="hidden" name="eventid" id="eventid" value=""/>
+          <button type="submit" class="btn btn-primary">Enroll</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </form>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: [ 'interaction', 'dayGrid', 'timeGrid' ],
+      defaultView: 'dayGridDay',
+      defaultDate: '2019-06-07',
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: '',
+      },
+      selectable: true,
+
+      events: {
+
+          url:'/events_clean',
+          method: 'POST',
+          failure: function(){
+            alert('oops, error while fetching events');
+          }
+      },
+      eventClick: function(info){
+        var title = info.event.title;
+        var id = info.event.id;
+        var start_date = info.event.start_date;
+        var end_time = info.event.end_date;
+        var divhead = document.createElement("div");
+        divhead.innerHTML = title;
+        var divbody = document.createElement("div");
+        divbody.innerHTML = start;
+        $('#eventtitle').val(title);
+        $('#eventid').val(id);
+        document.getElementById("exampleModalLabel").appendChild(divhead);
+        document.getElementById("bodytext").appendChild(divbody);
+        $('#exampleModal').modal('show');
+      },
+    });
+
+    calendar.render();
+  });
+
+  </script>
+{% else %}
+  <div id='calendar'></div>
+
+  <!-- Modal -->
+  <form class="m-5" action="cleanshifts" method="post">
+    {% csrf_token %}
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="bodytext" class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <input type="hidden" name="eventtitle" id="eventtitle" value=""/>
+          <input type="hidden" name="eventid" id="eventid" value=""/>
+          <button type="submit" class="btn btn-primary">Enroll</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </form>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: [ 'interaction', 'dayGrid', 'timeGrid' ],
+      defaultView: 'dayGridDay',
+      defaultDate: '2019-06-07',
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: '',
+      },
+      selectable: true,
+
+      events: {
+
+          url:'/events_clean_person',
+          method: 'POST',
+          failure: function(){
+            alert('oops, error while fetching events');
+          }
+      },
+      eventClick: function(info){
+        var title = info.event.title;
+        var id = info.event.id;
+        var start_date = info.event.start_date;
+        var end_time = info.event.end_date;
+        var divhead = document.createElement("div");
+        divhead.innerHTML = title;
+        var divbody = document.createElement("div");
+        divbody.innerHTML = start;
+        $('#eventtitle').val(title);
+        $('#eventid').val(id);
+        document.getElementById("exampleModalLabel").appendChild(divhead);
+        document.getElementById("bodytext").appendChild(divbody);
+        $('#exampleModal').modal('show');
+      },
+    });
+
+    calendar.render();
+  });
+
+  </script>
+{% endif %}
 {% endblock %}
