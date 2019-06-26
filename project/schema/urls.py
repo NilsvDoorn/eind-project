@@ -18,5 +18,5 @@ urlpatterns = [
     path("events_clean", views.events_clean, name="events_clean"),
     path("events_clean_person", views.events_clean_person, name="events_clean_person"),
     path("mollie", views.mollie, name="mollie"),
-    path("succes", views.succes, name="succes"),
+    path("succes/<str:name>", views.succes, name="succes"),
 ]

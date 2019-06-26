@@ -31,29 +31,31 @@ mollie_client.set_api_key("test_rTe5Ak2VKrBF2SgxFcJgCdfqVHnE7S")
 def show_rooms(request):
     if request.method == "GET":
         return render(request,"reserve.html")
+    elif request.POST['datefilter'] == "":
+        return render(request,"reserve.html", {'message':'Fill in all fields'})
 
     start_date = request.POST['datefilter'][:10]
     end_date = request.POST['datefilter'][13:]
     today = str(dt.date.today())
 
-    if today > start_date or start_date == end_date:
+    if check_date(start_date) or check_date(end_date):
+        return render(request, "reserve.html", {'message':"Don't do that"})
+
+    if today > start_date or start_date >= end_date:
         return render(request,"reserve.html", {'message':'This date is already over'})
 
     rooms = Rooms.objects.all()
     Range = namedtuple('Range', ['start', 'end'])
-    r1 = Range(start=dt.datetime(int(start_date[:4]),int(start_date[5:7]),int(start_date[8:10])), end=dt.datetime(int(end_date[:4]),int(end_date[5:7]),int(end_date[8:10])))
+    r1 = Range(start=dt.datetime(int(start_date[:4]),int(start_date[5:7]),int(start_date[8:10])),
+                end=dt.datetime(int(end_date[:4]),int(end_date[5:7]),int(end_date[8:10])))
 
     for booking in Booked.objects.all():
-        r2 = Range(start=dt.datetime(int(str(booking.start_date)[:4]),int(str(booking.start_date)[5:7]),int(str(booking.start_date)[8:10])), end=dt.datetime(int(str(booking.end_date)[:4]),int(str(booking.end_date)[5:7]),int(str(booking.end_date)[8:10])))
-        latest_start = max(r1.start, r2.start)
-        earliest_end = min(r1.end, r2.end)
-        delta = (earliest_end - latest_start).days + 1
-        overlap = max(0, delta)
-        if overlap:
+        if check_available(booking, start_date, end_date):
             rooms = rooms.exclude(roomnumber__exact=booking.roomnumber)
 
     if len(rooms) == 0:
         return render(request,"reserve.html", {'message':'There are no rooms free in this period'})
+
     context = {
         'rooms':rooms,
         'start_date':start_date,
@@ -97,24 +99,31 @@ def add_cleanshift(request):
     clean_date = request.POST['datetimes']
     start_time = request.POST['start_time']
     end_time = request.POST['end_time']
+
+    if check_date(clean_date) or check_time(start_time) or check_time(end_time):
+        return render(request,"reserve.html", {'message':"Don't do that"})
+
     if clean_date == "" or start_time == "" or end_time == "":
-        return render(request,"cleanshifts.html", {'message':'Fill in all fields'})
+        return render(request,"cleanshifts.html", {'message':"Fill in all fields"})
 
     start_time = dt.time(int(start_time[:2]), int(start_time[3:5]))
     end_time = dt.time(int(end_time[:2]), int(end_time[3:5]))
-    roomnumber = request.POST['roomnumber']
-    if roomnumber == "":
+    if request.user.is_superuser:
         roomnumber = request.POST['roomnumber2']
+    else:
+        roomnumber = request.POST['roomnumber']
+        if roomnumber == "" or person_room(roomnumber, request.user):
+            return render(request,"reserve.html", {'message':"Don't do that"})
 
     today = str(dt.date.today())
     time_now = dt.time(int(str(dt.datetime.now())[11:13]),int(str(dt.datetime.now())[14:16]))
 
     if today > clean_date:
-        return render(request,"cleanshifts.html", {'message':'This date is already over'})
+        return render(request,"cleanshifts.html", {'message':"This date is already over"})
     elif today == clean_date and start_time < time_now:
-        return render(request,"cleanshifts.html", {'message':'This time is already over'})
+        return render(request,"cleanshifts.html", {'message':"This time is already over"})
     elif end_time < start_time:
-        return render(request,"cleanshifts.html", {'message':'Invalid time'})
+        return render(request,"cleanshifts.html", {'message':"Invalid time"})
     shift = Cleanshifts.objects.create(name=request.user,
                                         roomnumber=roomnumber,
                                         date=clean_date,
@@ -141,17 +150,24 @@ def add_review(request):
         anoniem = False
     roomnumber = Booked.objects.get(name=request.user).roomnumber
 
-    review = Reviews.objects.create(name=request.user,roomnumber=roomnumber,message=request.POST['review'],note=request.POST['rating'],anoniem=anoniem)
+    review = Reviews.objects.create(name=request.user,
+                                    roomnumber=roomnumber,
+                                    message=request.POST['review'],
+                                    note=request.POST['rating'],
+                                    anoniem=anoniem)
     return HttpResponseRedirect(reverse("reviews"))
 
 def room_info(request):
-    context = {
-        'roomnumber':request.POST['roomnumber'],
-        'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
-        'start_date':request.POST['start_date'],
-        'end_date':request.POST['end_date']
-    }
-    return render(request,"room_info.html", context)
+    if len(Rooms.objects.filter(roomnumber__exact=request.POST['roomnumber'])) == 1:
+        context = {
+            'roomnumber':request.POST['roomnumber'],
+            'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
+            'start_date':request.POST['start_date'],
+            'end_date':request.POST['end_date']
+        }
+        return render(request,"room_info.html", context)
+    else:
+        return render(request,"reserve.html", {'message':"Don't do that"})
 
 def add_booking(request):
     if request.POST['name'] == "" or request.POST['email'] == "" or request.POST['phone'] == "":
@@ -169,14 +185,37 @@ def add_booking(request):
     roomnumber = request.POST['roomnumber']
     start_date = request.POST['start_date']
     end_date = request.POST['end_date']
+    today = str(dt.date.today())
+
+    if check_date(start_date) or check_date(end_date):
+        return render(request, "reserve.html", {'message':"Don't do that"})
+    if today > start_date or start_date >= end_date:
+        return render(request,"reserve.html", {'message':'This date is already over'})
+    elif roomnumber == "" or len(Rooms.objects.filter(roomnumber__exact=roomnumber)) != 1:
+        return render(request,"reserve.html", {'message':"Don't do that"})
+    elif len(phonenumber) != 10 or not phonenumber.isnumeric():
+        context = {
+            'roomnumber':request.POST['roomnumber'],
+            'room_info':Rooms.objects.get(roomnumber__exact=request.POST['roomnumber']),
+            'start_date':request.POST['start_date'],
+            'end_date':request.POST['end_date'],
+            'message':'Invalid phonenumber'
+        }
+        return render(request,"room_info.html", context)
+
+    for booking in Booked.objects.filter(roomnumber__exact=roomnumber):
+        if check_available(booking, start_date, end_date):
+            return render(request, "reserve.html", {'message':"This room is already been booked"})
+
     d1 = dt.date(int(start_date[:4]), int(start_date[5:7]), int(start_date[8:10]))
     d2 = dt.date(int(end_date[:4]), int(end_date[5:7]), int(end_date[8:10]))
     nights = (d2 - d1).days
-    price = float(request.POST['price']) * nights
+    price = float(Rooms.objects.get(roomnumber__exact=roomnumber).price) * nights
     try:
         user = User.objects.get(username__exact=name)
     except:
         user = None
+
     if user is not None:
         context = {
             'roomnumber':request.POST['roomnumber'],
@@ -186,6 +225,7 @@ def add_booking(request):
             'message':'Name has already been taken'
         }
         return render(request,"room_info.html", context)
+
     password = randompassword()
     user = User.objects.create_user(name, email, password)
     user.save()
@@ -240,7 +280,6 @@ def mollie(request, name, price):
         # In this example we store the order with its payment status in a database.
         #
         data = {'status': payment.status}
-        print(payment.status)
         # database_write(my_webshop_id, data)
 
         #
@@ -251,12 +290,19 @@ def mollie(request, name, price):
     except Error as err:
         print('API call failed: {error}'.format(error=err))
 
-def succes(request, booked_name):
-    print(booked_name)
-    booking = Booked.objects.filter(name__exact=booked_name)
-    print(booking.payment_id)
+def succes(request, name):
 
-    return render(request,"succes.html")
+    try:
+        booking = Booked.objects.get(name__exact=name)
+        payment = mollie_client.payments.get(booking.payment_id)
+    except:
+        return render(request,"reserve.html")
+
+    if payment.status == "paid":
+        return render(request,"succes.html")
+    else:
+        booking.delete()
+        return render(request,"reserve.html", {'message':'Payment went wrong'})
 
 @csrf_exempt
 def events(request):
@@ -291,3 +337,40 @@ def events_clean_person(request):
         list.append(dict)
 
     return JsonResponse(list, safe=False)
+
+def check_date(date):
+    try:
+        dt.datetime.strptime(date, '%Y-%m-%d')
+        return False
+    except ValueError:
+        return True
+
+def check_time(time):
+    try:
+        dt.datetime.strptime(time, "%H:%M")
+        return False
+    except ValueError:
+        return True
+
+def person_room(room, user):
+    if user.is_superuser:
+        return False
+    elif int(Booked.objects.get(name__exact=user).roomnumber) == int(room):
+        return False
+    else:
+        return True
+
+def check_available(booking, start_date, end_date):
+    Range = namedtuple('Range', ['start', 'end'])
+    r1 = Range(start=dt.datetime(int(start_date[:4]),int(start_date[5:7]),int(start_date[8:10])),
+                end=dt.datetime(int(end_date[:4]),int(end_date[5:7]),int(end_date[8:10])))
+    r2 = Range(start=dt.datetime(int(str(booking.start_date)[:4]),int(str(booking.start_date)[5:7]),int(str(booking.start_date)[8:10])),
+                end=dt.datetime(int(str(booking.end_date)[:4]),int(str(booking.end_date)[5:7]),int(str(booking.end_date)[8:10])))
+    latest_start = max(r1.start, r2.start)
+    earliest_end = min(r1.end, r2.end)
+    delta = (earliest_end - latest_start).days + 1
+    overlap = max(0, delta)
+    if overlap:
+        return True
+    else:
+        return False

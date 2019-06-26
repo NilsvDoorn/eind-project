@@ -7,11 +7,11 @@ body:before {
   left: 0;
   top: 0;
   z-index: -10;
-  background-image: url(images/pino.jpg);
+  background-color: lightblue;
+  background-image: url("/static/schema/images/pino.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: left top;
-  background-color: lightblue;
 }
 
 main {

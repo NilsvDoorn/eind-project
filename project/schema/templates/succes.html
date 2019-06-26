@@ -1,1 +1,14 @@
-SUCCES
+{% extends "layout.html" %}
+
+{% block title %}
+    succes
+{% endblock %}
+
+{% block main %}
+  {% if message %}
+      <div>
+          {{ message }}
+      </div>
+  {% endif %}
+<h1>Your booking has been booked</h1>
+{% endblock %}

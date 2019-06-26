@@ -5,15 +5,16 @@
 {% endblock %}
 
 {% block main %}
+    <h4>Arrival and Departure</h4>
     {% if message %}
         <div class="form-group">
             {{ message }}
         </div>
     {% endif %}
-    <form action="show_rooms" method="post">
+    <form action="/show_rooms" method="post">
       {% csrf_token %}
       <div class="form-group">
-        Date: 
+        Date:
         <input type="text" name="datefilter" readonly>
 
         <button class="btn btn-primary" type="submit">Search</button>

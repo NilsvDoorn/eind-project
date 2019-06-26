@@ -20,8 +20,7 @@ class Booked(models.Model):
     phonenumber = models.CharField(max_length=10)
     start_date = models.DateField()
     end_date = models.DateField()
-    payment_id = models.IntegerField()
-    payed = models.BooleanField(null=True, blank=True)
+    payment_id = models.CharField(max_length=50)
 
 class Cleanshifts(models.Model):
     name = models.CharField(max_length=50)
