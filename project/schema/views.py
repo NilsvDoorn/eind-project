@@ -32,27 +32,27 @@ def show_rooms(request):
     if request.method == "GET":
         return render(request,"reserve.html")
     elif request.POST['datefilter'] == "":
-        return render(request,"reserve.html", {'message':'Fill in all fields'})
+        return render(request, "reserve.html", {'message':'Fill in all fields'})
 
     start_date = request.POST['datefilter'][:10]
     end_date = request.POST['datefilter'][13:]
     today = str(dt.date.today())
 
+    # chech for validation of both dates
     if check_date(start_date) or check_date(end_date):
         return render(request, "reserve.html", {'message':"Don't do that"})
-
-    if today > start_date or start_date >= end_date:
+    elif today > start_date or start_date >= end_date:
         return render(request,"reserve.html", {'message':'This date is already over'})
 
+    # Get all rooms of model Rooms
     rooms = Rooms.objects.all()
-    Range = namedtuple('Range', ['start', 'end'])
-    r1 = Range(start=dt.datetime(int(start_date[:4]),int(start_date[5:7]),int(start_date[8:10])),
-                end=dt.datetime(int(end_date[:4]),int(end_date[5:7]),int(end_date[8:10])))
 
+    # Filter all rooms that are booked on this daterange
     for booking in Booked.objects.all():
         if check_available(booking, start_date, end_date):
             rooms = rooms.exclude(roomnumber__exact=booking.roomnumber)
 
+    # No rooms available on this daterange
     if len(rooms) == 0:
         return render(request,"reserve.html", {'message':'There are no rooms free in this period'})
 
@@ -68,7 +68,11 @@ def login_view(request):
         return render(request, "login.html")
     username = request.POST["username"]
     password = request.POST["password"]
+
+    # Check password and username
     user = authenticate(request, username=username, password=password)
+
+    # If user is in model Users, login
     if user is not None:
         login(request, user)
         if user.is_superuser:
@@ -83,6 +87,8 @@ def logout_view(request):
 
 def cleanshifts(request):
     user = request.user
+
+    # if user is_superuser, he has no booking
     try:
         booking = Booked.objects.get(name__exact=user)
         context = {
@@ -291,7 +297,6 @@ def mollie(request, name, price):
         print('API call failed: {error}'.format(error=err))
 
 def succes(request, name):
-
     try:
         booking = Booked.objects.get(name__exact=name)
         payment = mollie_client.payments.get(booking.payment_id)
@@ -353,8 +358,12 @@ def check_time(time):
         return True
 
 def person_room(room, user):
+
+    # If person is superuser, all rooms are correct
     if user.is_superuser:
         return False
+
+    # User can only give own room
     elif int(Booked.objects.get(name__exact=user).roomnumber) == int(room):
         return False
     else:
