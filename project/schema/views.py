@@ -215,7 +215,8 @@ def room_info(request):
 
 def add_booking(request):
     roomnumber = request.POST['roomnumber']
-    if request.POST['name'] == "" or request.POST['email'] == "" or request.POST['phone'] == "":
+    phonenumber = ('06' + request.POST['phone'])
+    if request.POST['name'] == "" or request.POST['email'] == "" :
         context = {
             'roomnumber': request.POST['roomnumber'],
             'room_info': Rooms.objects.get(roomnumber__exact=roomnumber),
@@ -224,9 +225,19 @@ def add_booking(request):
             'message': 'Fill in all information'
         }
         return render(request, "room_info.html", context)
+    elif len(phonenumber) != 10 or not phonenumber.isnumeric():
+        context = {
+            'roomnumber': request.POST['roomnumber'],
+            'room_info': Rooms.objects.get(roomnumber__exact=roomnumber),
+            'start_date': request.POST['start_date'],
+            'end_date': request.POST['end_date'],
+            'message': 'Invalid phonenumber'
+        }
+        return render(request, "room_info.html", context)
+
     name = request.POST['name'] + randompassword()
     email = request.POST['email']
-    phonenumber = ('06' + request.POST['phone'])
+
     start_date = request.POST['start_date']
     end_date = request.POST['end_date']
     today = str(dt.date.today())
@@ -240,15 +251,7 @@ def add_booking(request):
         return render(request, "reserve.html", {'message': "Don't do that"})
     elif roomnumber == "":
         return render(request, "reserve.html", {'message': "Don't do that"})
-    elif len(phonenumber) != 10 or not phonenumber.isnumeric():
-        context = {
-            'roomnumber': request.POST['roomnumber'],
-            'room_info': Rooms.objects.get(roomnumber__exact=roomnumber),
-            'start_date': request.POST['start_date'],
-            'end_date': request.POST['end_date'],
-            'message': 'Invalid phonenumber'
-        }
-        return render(request, "room_info.html", context)
+
 
     # Check or room is still available on given date
     for booking in Booked.objects.filter(roomnumber__exact=roomnumber):

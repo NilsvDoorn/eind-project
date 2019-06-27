@@ -1,5 +1,6 @@
 # Eindproject Pino Alto
 Door: Nils van Doorn
+filmpje: https://www.youtube.com/watch?v=zyJebF2MnCc
 
 Er zijn 3 verschillende personen waar onderscheid in gemaakt wordt.
 
@@ -62,3 +63,5 @@ API-lijst:
 4. mollie betalingsverzoek:
 	1. https://www.mollie.com/nl/
 	2. license: The MIT License (MIT)
+5. dateranges overlap
+	1. https://stackoverflow.com/questions/9044084/efficient-date-range-overlap-calculation-in-python
